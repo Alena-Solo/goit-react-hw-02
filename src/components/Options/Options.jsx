@@ -1,35 +1,23 @@
 import React from "react";
-import styles from "./Options.module.css";
+import css from "./Options.module.css";
 
-const Options = ({ setFeedback, totalFeedback, resetFeedback }) => {
-  const updateFeedback = (feedbackType) => {
-    setFeedback((prev) => ({
-      ...prev,
-      [feedbackType]: prev[feedbackType] + 1,
-    }));
-  };
-
+export default function Options({ update, reset, total }) {
   return (
-    <div className={s.optionWrapper}>
-      <button className={s.optionButton} onClick={() => updateFeedback("good")}>
+    <div>
+      <button className={css.button} onClick={() => update("good")}>
         Good
       </button>
-      <button
-        className={s.optionButton}
-        onClick={() => updateFeedback("neutral")}
-      >
+      <button className={css.button} onClick={() => update("neutral")}>
         Neutral
       </button>
-      <button className={s.optionButton} onClick={() => updateFeedback("bad")}>
+      <button className={css.button} onClick={() => update("bad")}>
         Bad
       </button>
-      {totalFeedback > 0 && (
-        <button className={s.optionButton} onClick={resetFeedback}>
+      {total > 0 && (
+        <button className={css.button} onClick={reset}>
           Reset
         </button>
       )}
     </div>
   );
-};
-
-export default Options;
+}

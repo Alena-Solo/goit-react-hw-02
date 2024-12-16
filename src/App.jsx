@@ -1,68 +1,63 @@
 import { useState, useEffect } from "react";
+import "./App.css";
 import Description from "./components/Description/Description";
-import Options from "./components/Options/Options";
 import Feedback from "./components/Feedback/Feedback";
+import Options from "./components/Options/Options";
 import Notification from "./components/Notification/Notification";
 
 function App() {
-  // const [feedback, setFeedback] = useState(() => {
-  //   const savedFeedback = JSON.parse(localStorage.getItem("feedback"));
-  // if (savedFeedback && savedFeedback.length) {
-  //     return savedFeedback
-  // }
-  // return []}) не працює якщо savedFeedback об'єкт
+  const [values, setValues] = useState(() => {
+    const savedValues = window.localStorage.getItem("saved-values");
 
-  const [feedback, setFeedback] = useState(() => {
-    const savedFeedback = localStorage.getItem("feedback");
-    console.log("Сюди приходять дані із localStorage:", savedFeedback);
-    return savedFeedback
-      ? JSON.parse(savedFeedback)
-      : { good: 0, neutral: 0, bad: 0 };
-    // if (savedFeedback) {
-    //   return JSON.parse(savedFeedback);
-    // } else {
-    //   return { good: 0, neutral: 0, bad: 0 };
-    // }
+    if (savedValues !== null) {
+      return JSON.parse(savedValues);
+    }
+    return {
+      good: 0,
+      neutral: 0,
+      bad: 0,
+    };
   });
 
   useEffect(() => {
-    if (feedback) {
-      localStorage.setItem("feedback", JSON.stringify(feedback));
-    }
-  }, [feedback]);
+    window.localStorage.setItem("saved-values", JSON.stringify(values));
+  }, [values]);
 
-  const totalFeedback = feedback.good + feedback.neutral + feedback.bad;
-
-  const positiveFeedback =
-    totalFeedback > 0 ? Math.round((feedback.good / totalFeedback) * 100) : 0;
+  const updateFeedback = (feedbackType) => {
+    setValues((prev) => ({
+      ...prev,
+      [feedbackType]: prev[feedbackType] + 1,
+    }));
+  };
 
   const resetFeedback = () => {
-    setFeedback({
+    setValues({
       good: 0,
       neutral: 0,
       bad: 0,
     });
   };
 
+  const totalFeedback = values.good + values.neutral + values.bad;
+
+  const positiveFeedback = Math.round((values.good / totalFeedback) * 100);
+
   return (
-    <div className="wrapper">
+    <div>
       <Description />
       <Options
-        feedback={feedback}
-        setFeedback={setFeedback}
-        totalFeedback={totalFeedback}
-        resetFeedback={resetFeedback}
+        update={updateFeedback}
+        reset={resetFeedback}
+        total={totalFeedback}
       />
-      {totalFeedback === 0 ? (
-        <Notification />
-      ) : (
+      {totalFeedback > 0 ? (
         <Feedback
-          good={feedback.good}
-          neutral={feedback.neutral}
-          bad={feedback.bad}
+          value={values}
           total={totalFeedback}
-          pozitive={positiveFeedback}
+          positive={positiveFeedback}
         />
+      ) : (
+        <Notification />
       )}
     </div>
   );
