@@ -1,64 +1,71 @@
 import { useState, useEffect } from "react";
-import Feedback from "./components/Feedback/Feedback";
-import Options from "./components/Options/Options";
-import Notification from "./components/Notification/Notification";
 import Description from "./components/Description/Description";
-import "./styles.css";
+import Options from "./components/Options/Options";
+import Feedback from "./components/Feedback/Feedback";
+import Notification from "./components/Notification/Notification";
 
-const App = () => {
-  const [feedback, setFeedback] = useState(
-    () =>
-      JSON.parse(localStorage.getItem("feedback")) || {
-        good: 0,
-        neutral: 0,
-        bad: 0,
-      }
-  );
+function App() {
+  // const [feedback, setFeedback] = useState(() => {
+  //   const savedFeedback = JSON.parse(localStorage.getItem("feedback"));
+  // if (savedFeedback && savedFeedback.length) {
+  //     return savedFeedback
+  // }
+  // return []}) не працює якщо savedFeedback об'єкт
+
+  const [feedback, setFeedback] = useState(() => {
+    const savedFeedback = localStorage.getItem("feedback");
+    console.log("Сюди приходять дані із localStorage:", savedFeedback);
+    return savedFeedback
+      ? JSON.parse(savedFeedback)
+      : { good: 0, neutral: 0, bad: 0 };
+    // if (savedFeedback) {
+    //   return JSON.parse(savedFeedback);
+    // } else {
+    //   return { good: 0, neutral: 0, bad: 0 };
+    // }
+  });
+
+  useEffect(() => {
+    if (feedback) {
+      localStorage.setItem("feedback", JSON.stringify(feedback));
+    }
+  }, [feedback]);
 
   const totalFeedback = feedback.good + feedback.neutral + feedback.bad;
-  const positiveFeedback = totalFeedback;
-  ?Math.round((feedback.good / totalFeedback) * 100)
-  : 0;
 
-useEffect(() => {
-  localStorage.setItem("feedback", JSON.stringify(feedback));
+  const positiveFeedback =
+    totalFeedback > 0 ? Math.round((feedback.good / totalFeedback) * 100) : 0;
 
-}, [feedback]);
+  const resetFeedback = () => {
+    setFeedback({
+      good: 0,
+      neutral: 0,
+      bad: 0,
+    });
+  };
 
-const updateFeedback = (feedbackType) => {
-  setFeedback((prevFeedback) => ({
-    ...prevFeedback,
-    [feedbackType]: prevFeedback[feedbackType] + 1,
-  }));
-};
-
-const restFeedback = () => {
-  setFeedback({ good: 0, neutral: 0, bad: 0 });
-};
-
-return (
-  <div>
-    <hi>Sip Happens Café</hi>
-    <p>Please leave your feedback about our service by selecting one of the
-      options below.</p>
-    <Options
-      onLeaveFeedback={updateFeedback}
-      onRest={restFeedback}
-      totalFeedback={totalFeedback}
-    />
-    {totalFeedback > 0 ? (
-      <Feedback
-        good={feedback.good}
-        neutral={feedback.neutral}
-        bad={feedback.bad}
+  return (
+    <div className="wrapper">
+      <Description />
+      <Options
+        feedback={feedback}
+        setFeedback={setFeedback}
         totalFeedback={totalFeedback}
-        positiveFeedback={positiveFeedback}
+        resetFeedback={resetFeedback}
       />
-    ) : (
-      <Notification message="No feedback given" />
-    )}
-  </div>
-);
-};
+      {totalFeedback === 0 ? (
+        <Notification />
+      ) : (
+        <Feedback
+          good={feedback.good}
+          neutral={feedback.neutral}
+          bad={feedback.bad}
+          total={totalFeedback}
+          pozitive={positiveFeedback}
+        />
+      )}
+    </div>
+  );
+}
 
 export default App;
